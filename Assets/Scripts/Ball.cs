@@ -4,6 +4,7 @@ using System;
 public class Ball : MonoBehaviour
 {
     public static event Action OnBallInBasket;
+    public static event Action OnBallInBasketImmediately;
     public static event Action<int> OnGoal;
     public static event Action OnThrow;
     public static event Action<float> OnMiss;
@@ -11,9 +12,9 @@ public class Ball : MonoBehaviour
 
     private int _targetLinePointCount;
     public GameObject TargetLinePoint;
-    private const int TargetHintPartCountMax = 20;
+    private const int TargetHintPartCountMax = 15;
     private int _targetHintPartCount;
-    private readonly GameObject[] _targetLinePoints = new GameObject[20 + TargetHintPartCountMax];
+    private readonly GameObject[] _targetLinePoints = new GameObject[15 + TargetHintPartCountMax];
     private Vector3 _mouseTarget;
     private int _indicatorCurrentParth = 0;
     private Rigidbody2D _body;
@@ -250,9 +251,9 @@ public class Ball : MonoBehaviour
 
         float _pX = transform.position.x;
         float _pY = transform.position.y;
-        float dTime = t / _targetLinePointCount;
+        float dTime = t / 30f;
         float velY = -force.y;
-        float velX = dist.x / _targetLinePointCount;
+        float velX = dist.x / 30f;
 
         if (_indicatorCurrentParth < _targetLinePointCount)
             ++_indicatorCurrentParth;
@@ -261,31 +262,41 @@ public class Ball : MonoBehaviour
 
         GameObject _object;
         float _scale = 1f;
-        for (int i = 0; i < _targetLinePointCount + _targetHintPartCount; i++)
+        int id;
+        for (int i = 0; i < 60; i++)
         {
             _pX += velX;
             velY += Physics.gravity.y * dTime;
             _pY += velY * dTime;
-            _object = _targetLinePoints[i];
-            if (i == _targetLinePointCount - 1)
-                _scale = 1.0f;
-            //else
-            //	if (i == indicatorCurrentParth)
-            //	_scale = 1f;
-            else
+
+
+            if (i % 2 != 0) continue;
+
+            id = (int) (i / 2);
+            if (id < _targetLinePointCount + _targetHintPartCount)
             {
-                if (i < _targetLinePointCount + 1)
-                    _scale = 0.15f + ((float) i / (float) _targetLinePointCount) * 0.5f;
+                _object = _targetLinePoints[id];
+                if (id == _targetLinePointCount - 1)
+                    _scale = 1.0f;
+                //else
+                //	if (i == indicatorCurrentParth)
+                //	_scale = 1f;
                 else
-                    _scale = 0.65f - (float) (i - TargetHintPartCountMax) * (0.5f / TargetHintPartCountMax);
+                {
+                    if (id < _targetLinePointCount)
+                        _scale = 0.15f + ((float) id / (float) _targetLinePointCount) * 0.45f;
+                    else
+                        _scale = 0.5f - (float) (id - TargetHintPartCountMax) * (0.45f / TargetHintPartCountMax);
 
-                if (i == _indicatorCurrentParth) _scale *= 1.2f;
+                    //if (i == _indicatorCurrentParth) _scale *= 1.2f;
+                }
+
+                _object.transform.localScale = Vector3.Lerp(_object.transform.localScale,
+                    new Vector3(_scale, _scale, 1f),
+                    0.2f);
+
+                _object.transform.position = new Vector3(_pX, _pY, 1f);
             }
-
-            _object.transform.localScale = Vector3.Lerp(_object.transform.localScale, new Vector3(_scale, _scale, 1f),
-                0.2f);
-
-            _object.transform.position = new Vector3(_pX, _pY, 1f);
         }
     }
 

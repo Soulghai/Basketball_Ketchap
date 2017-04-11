@@ -214,7 +214,7 @@ public class ScreenMenu : MonoBehaviour {
 		if (_isWaitGiftTime) {
 			DateTime _currentDate = System.DateTime.UtcNow;
 			TimeSpan _difference = _giftNextDate.Subtract (_currentDate);
-			if (_difference.TotalSeconds <= 0f) {
+			if ((_difference.TotalSeconds <= 0f)&&(DefsGame.currentScreen == DefsGame.SCREEN_MENU)) {
 				_isWaitGiftTime = false;
 				UIManager.ShowUiElement ("BtnGift");
 				FlurryEventsManager.SendEvent ("collect_prize_impression");

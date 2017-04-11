@@ -87,7 +87,7 @@ public class Coin : MonoBehaviour {
 					transform.position = new Vector3(transform.position.x + _velocity * Mathf.Cos(_moveAngle),
 						transform.position.y + _velocity * Mathf.Sin(_moveAngle), 1f);
 
-					if (Vector3.Distance(transform.position, _targetPos) <= 0.1f) {
+					if (Vector2.Distance(transform.position, _targetPos) <= 0.1f) {
 						_isMoveToTarget = false;
 
 						GameEvents.Send(OnAddCoinsVisual, 1);

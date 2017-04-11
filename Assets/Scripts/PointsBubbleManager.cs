@@ -69,7 +69,7 @@ public class PointsBubbleManager : MonoBehaviour {
 		count = _count;
 
 
-	    RingObject ringObject = DefsGame.RingManager.CurrentRing.GetComponent<RingObject> ();
+		RingObject ringObject = DefsGame.RingManager._nextRing.GetComponent<RingObject> ();
 		pos = ringObject.PointsPlace.position;
 	}
 }

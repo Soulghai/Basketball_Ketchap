@@ -10,11 +10,10 @@ public class RingManager : MonoBehaviour {
     public GameObject CoinPrefab;
 
     private GameObject coinObject;
-	GameObject _prevRing;
-	[HideInInspector] public GameObject CurrentRing;
-	GameObject _nextRing;
+    private GameObject _prevRing;
+	[HideInInspector] public GameObject _nextRing;
 
-	const float START_X_POSITION = -5.6f;
+	private const float StartXPosition = -5.6f;
 
     [HideInInspector] public bool WaitMoveToStartPosition;
 
@@ -30,26 +29,27 @@ public class RingManager : MonoBehaviour {
 	}
 
 	void OnEnable() {
+	    Ball.OnGoal += Ball_OnGoal;
 		Ball.OnBallInBasket += Ball_OnBallInBasket;
-	   // Ball.OnMiss += Ball_OnMiss;
 	    Ball.OnCoinSensor += Ball_OnCoinSensor;
 	}
 
 	void OnDisable() {
+	    Ball.OnGoal -= Ball_OnGoal;
 		Ball.OnBallInBasket -= Ball_OnBallInBasket;
-	    //Ball.OnMiss -= Ball_OnMiss;
 	    Ball.OnCoinSensor -= Ball_OnCoinSensor;
 	}
-
-    private void Ball_OnMiss(float value)
-    {
-
-    }
 
     private void Ball_OnCoinSensor()
     {
         AddTenPoints();
     }
+
+    private void Ball_OnGoal (int pointsCount)
+	{
+	    RingHead ringHead = _nextRing.GetComponentInChildren<RingHead>();
+	    ringHead.MoveToSky();
+	}
 
     private void Ball_OnBallInBasket()
 	{
@@ -73,7 +73,6 @@ public class RingManager : MonoBehaviour {
     {
         WaitMoveToStartPosition = false;
         _prevRing = null;
-        CurrentRing = null;
         _nextRing = null;
         CreateFirstRing ();
         CreateNewRing ();
@@ -94,7 +93,7 @@ public class RingManager : MonoBehaviour {
 
     private void MoveToStartPosition()
     {
-        Tweener t = _prevRing.transform.DOMove (new Vector3 (START_X_POSITION, -2f, 1f), 0.5f);
+        Tweener t = _prevRing.transform.DOMove (new Vector3 (StartXPosition, -2f, 1f), 0.5f);
         t.SetEase (Ease.InCubic);
 
         Vector3 newPoint = ChooseNextPoint ();
@@ -113,18 +112,18 @@ public class RingManager : MonoBehaviour {
     private void MoveCurrentBasket()
     {
         RingObject ringObject = _prevRing.GetComponent<RingObject> ();
-        Tweener t = _prevRing.transform.DOMove (new Vector3 (START_X_POSITION - 5f, _prevRing.transform.position.y, 1f), 0.5f);
+        Tweener t = _prevRing.transform.DOMove (new Vector3 (StartXPosition - 5f, _prevRing.transform.position.y, 1f), 0.5f);
         t.SetEase (Ease.InCubic);
         ringObject.Remove ();
 
-        t = _nextRing.transform.DOMove (new Vector3 (START_X_POSITION, _nextRing.transform.position.y, 1f), 0.5f);
+        t = _nextRing.transform.DOMove (new Vector3 (StartXPosition, _nextRing.transform.position.y, 1f), 0.5f);
         t.SetEase (Ease.InCubic);
         t.OnComplete (() => {
             RingHead ringHead = _prevRing.GetComponentInChildren<RingHead>();
-            ringHead.Show(false);
+            ringHead.Hide();
 
-            ShieldVisual shieldVisual = _prevRing.GetComponentInChildren<ShieldVisual>();
-            shieldVisual.Hide();
+			//ringObject = _prevRing.GetComponent<RingObject> ();
+			//ringObject.ShieldVisual.Hide();
         });
 
         GameEvents.Send(OnParallaxMove);
@@ -137,13 +136,13 @@ public class RingManager : MonoBehaviour {
 
     private void CreateFirstRing() {
 		_prevRing = GetInactveRing ();
-		_prevRing.transform.position = new Vector3 (START_X_POSITION - 5f, -2f, 1f);
-		Tweener t = _prevRing.transform.DOMove (new Vector3 (START_X_POSITION, -2f, 1f), 0.5f);
+		_prevRing.transform.position = new Vector3 (StartXPosition - 5f, -2f, 1f);
+		Tweener t = _prevRing.transform.DOMove (new Vector3 (StartXPosition, -2f, 1f), 0.5f);
 		t.SetEase (Ease.InCubic);
 		RingHead ringHead = _prevRing.GetComponentInChildren<RingHead> ();
-		ringHead.Show (false);
-        ShieldVisual shieldVisual = _prevRing.GetComponentInChildren<ShieldVisual>();
-        shieldVisual.Hide();
+		ringHead.Hide();
+		//RingObject ringObject = _prevRing.GetComponent<RingObject> ();
+		//ringObject.ShieldVisual.Hide();
 	}
 
     private void CreateNewRing() {
@@ -151,9 +150,9 @@ public class RingManager : MonoBehaviour {
 		_nextRing = GetInactveRing ();
 		_nextRing.transform.position = new Vector3(newPoint.x + 10f, newPoint.y, newPoint.z);
 		RingHead ringHead = _nextRing.GetComponentInChildren<RingHead> (true);
-		ringHead.Show (true);
-        ShieldVisual shieldVisual = _nextRing.GetComponentInChildren<ShieldVisual>(true);
-        shieldVisual.Show();
+		ringHead.Show ();
+		//RingObject ringObject = _nextRing.GetComponent<RingObject> ();
+		//ringObject.ShieldVisual.Hide();
 
 		Tweener t = _nextRing.transform.DOMove (newPoint, 0.5f);
 		t.SetEase (Ease.InCubic);
@@ -167,8 +166,6 @@ public class RingManager : MonoBehaviour {
 		        DefsGame.CoinSensor.Show (true);
 		    }
 		});
-
-	    CurrentRing = _nextRing;
 	}
 
     private Vector3 ChooseNextPoint() {

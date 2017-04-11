@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class RingObject : MonoBehaviour
 {
+    public ShieldVisual ShieldVisual;
     public Transform PointsPlace;
 	float _time;
 	const float Delay = 1f;
