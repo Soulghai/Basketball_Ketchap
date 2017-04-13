@@ -8,14 +8,12 @@ public class Coins : MonoBehaviour {
 	int _pointsCount = 0;
 	bool _isShowAnimation = true;
 	float _startScale;
-	AudioSource _audioSource;
 	AudioClip _sndCoin;
 
 	// Use this for initialization
 	void Start ()
 	{
 	    DefsGame.Coins = this;
-		_audioSource = GetComponentInParent<AudioSource> ();
 		_sndCoin = Resources.Load<AudioClip>("snd/bonus");
 		textField.text = DefsGame.coinsCount.ToString();
 		//DefsGame.coinsIcon.UpdatePosition ();
@@ -48,7 +46,7 @@ public class Coins : MonoBehaviour {
 	void Coin_OnAddCoinsVisual (int value)
 	{
 		AddPointVisual (value);
-		_audioSource.PlayOneShot (_sndCoin);
+	    Defs.PlaySound(_sndCoin);
 	}
 
 	void Bubble_OnAddCoins (int value)

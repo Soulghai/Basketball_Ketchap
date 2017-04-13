@@ -2,11 +2,12 @@
 using DG.Tweening;
 
 public class RingHead : MonoBehaviour {
+	public  Animator ShieldAnimator;
+
     private Vector3 _startPosition;
 
 	// Use this for initialization
 	void Start () {
-	    _startPosition = gameObject.transform.position;
 	}
 	
 	// Update is called once per frame
@@ -24,6 +25,7 @@ public class RingHead : MonoBehaviour {
 
     public void MoveToSky()
     {
+        _startPosition = gameObject.transform.position;
         Tweener t = gameObject.transform.DOMove (
             new Vector3 (gameObject.transform.position.x, 6f, 1f), 0.5f);
         t.SetEase (Ease.InCubic);
@@ -31,5 +33,12 @@ public class RingHead : MonoBehaviour {
             gameObject.transform.position = _startPosition;
             Hide();
         });
+
+        PlayGoalAnimation();
+    }
+
+    private void PlayGoalAnimation()
+    {
+		ShieldAnimator.SetTrigger("isGoal");
     }
 }

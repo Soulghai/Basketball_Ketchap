@@ -15,8 +15,9 @@ public class BestScore : MonoBehaviour {
 	const float delay = 0.9f;
 	bool isShowAnimation = true;
 	bool isHideAnimation = false;
+    private AudioClip _sndNewHighScore;
 
-	// Use this for initialization
+    // Use this for initialization
 	void Start () {
 		Color _color = textField.color;
 		_color.a = 0f;
@@ -25,6 +26,7 @@ public class BestScore : MonoBehaviour {
 		startScale = img.transform.localScale.x;
 		pointsCount = DefsGame.gameBestScore;
 		textField.text = pointsCount.ToString ();
+	    _sndNewHighScore = Resources.Load<AudioClip>("snd/fanfares");
 	}
 
 	public void ShowAnimation() {
@@ -81,6 +83,8 @@ public class BestScore : MonoBehaviour {
 		pointsCount = DefsGame.gameBestScore;
 		textField.text = pointsCount.ToString ();
 		img.transform.localScale = new Vector3 (startScale * 1.4f, startScale * 1.4f, 1f);
+		Defs.PlaySound(_sndNewHighScore);
+
 	}
 
 	public void UpdateVisual() {

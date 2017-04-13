@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class CloudManager : MonoBehaviour {
     public GameObject[] Clouds;
@@ -7,42 +8,69 @@ public class CloudManager : MonoBehaviour {
     private const float PositionY = 3.05f;
     private const float PositionXSpace = 1f;
     private const float PositionYSpace = 1.3f;
+    private readonly List<GameObject> _activeArr = new List<GameObject>();
 
 	// Use this for initialization
 	void Start ()
 	{
-	    GameObject go;
-	    go = Clouds[0];
+	    GameObject go = AddObject();
 	    go.transform.position = new Vector3(-9.5f + Random.Range(-PositionXSpace, PositionXSpace),
 	        PositionY + Random.Range(-PositionYSpace, PositionYSpace), 1f);
-	    go = Clouds[1];
+	    go = AddObject();
 	    go.transform.position = new Vector3(0f + Random.Range(-PositionXSpace, PositionXSpace),
 	        PositionY + Random.Range(-PositionYSpace, PositionYSpace), 1f);
-	    go = Clouds[2];
+	    go = AddObject();
 	    go.transform.position = new Vector3(9.5f + Random.Range(-PositionXSpace, PositionXSpace),
 	        PositionY + Random.Range(-PositionYSpace, PositionYSpace), 1f);
+
+	    StartCoroutine (SpawnCloud ());
 	}
+
+    IEnumerator SpawnCloud() {
+        while (true)
+        {
+            AddObject();
+            yield return new WaitForSeconds (16f + Random.value*3.0f);
+        }
+    }
 
 	// Update is called once per frame
 	void Update () {
 	    float width = Camera.main.pixelWidth;
 	    Vector2 bottomLeft = Camera.main.ScreenToWorldPoint(new Vector2 (0, 0));
-	    Vector2 bottomRight = Camera.main.ScreenToWorldPoint(new Vector2 (width, 0));
 	    SpriteRenderer sprite;
 	    GameObject go;
-	    for (int i = 0; i < Clouds.Length; i++)
-	    {
-	        go = Clouds[i];
+	    int i = 0;
+	    while (i < _activeArr.Count) {
+	        go = _activeArr [i];
 	        sprite = go.GetComponent<SpriteRenderer>();
 	        go.transform.position = new Vector3(go.transform.position.x - 0.005f, go.transform.position.y, go.transform.position.z);
 
 	        if (go.transform.position.x + sprite.bounds.size.x*0.5f < bottomLeft.x)
 	        {
-	            go.transform.position = new Vector3(bottomRight.x + sprite.bounds.size.x*0.5f  + Random.Range(0, PositionXSpace),
-	                PositionY + Random.Range(-PositionYSpace, PositionYSpace), 1f);
+	            _activeArr.Remove (go);
+	            Destroy(go);
+	            continue;
 	        }
+	        ++i;
 	    }
-
-
 	}
+
+    private GameObject AddObject()
+    {
+        GameObject go = (GameObject)Instantiate(GetRandomBuilding(), new Vector3(), Quaternion.identity);
+        SpriteRenderer sprite = go.GetComponent <SpriteRenderer>();
+
+        float width = Camera.main.pixelWidth;
+        Vector2 bottomRight = Camera.main.ScreenToWorldPoint(new Vector2 (width, 0));
+        go.transform.position = new Vector3(bottomRight.x + sprite.bounds.size.x*0.5f  + Random.Range(0, PositionXSpace),
+            PositionY + Random.Range(-PositionYSpace, PositionYSpace), 1f);
+        _activeArr.Add(go);
+        return go;
+    }
+
+    private GameObject GetRandomBuilding() {
+        return Clouds[(int) Mathf.Round(Random.value*(Clouds.Length-1))];
+    }
+
 }

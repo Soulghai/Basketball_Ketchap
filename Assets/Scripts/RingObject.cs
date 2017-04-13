@@ -2,6 +2,7 @@
 
 public class RingObject : MonoBehaviour
 {
+    public RingHead RingHead;
     public ShieldVisual ShieldVisual;
     public Transform PointsPlace;
 	float _time;

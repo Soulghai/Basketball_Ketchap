@@ -11,34 +11,34 @@ public class ScreenGame : MonoBehaviour {
 	GameObject _backgroundPrev;
 	GameObject _backgroundNext;
 	bool _isBackgroundChange = false;
-	Points points;
-	Coins coins;
-	BestScore bestScore;
-	PointsBubbleManager _poinsBmScript;
+    private Points _points;
+    private Coins _coins;
+    private BestScore _bestScore;
+    private PointsBubbleManager _poinsBmScript;
 	//GameObject hint = null;
 	//SpriteRenderer hintSprite;
 
-	float time = 0f;
-	bool _isNextLevel;
-	int state = -1;
-	float missDelay = 0f;
-	public bool isGameOver = false;
-	Vector3 camera_start_pos;
+    private float _time = 0f;
+    private bool _isNextLevel;
+    private int _state = -1;
+    private float _missDelay = 0f;
+	public bool IsGameOver = false;
+    private Vector3 _cameraStartPos;
 
 	public static event Action OnShowMenu;
 	//int hintCounter;
 	//bool isHint = false;
 
-	bool _isScreenReviveDone = false;
-	bool _isScreenShareDone = false;
-	bool _isScreenRateDone = false;
+    private bool _isScreenReviveDone = false;
+    private bool _isScreenShareDone = false;
+    private bool _isScreenRateDone = false;
 
-	bool _isReviveUsed;
+    private bool _isReviveUsed;
 
-	AudioClip _sndLose;
-	AudioClip _sndShowScreen;
-	AudioClip _sndGrab;
-	AudioClip _sndClose;
+    private AudioClip _sndLose;
+    private AudioClip _sndShowScreen;
+    private AudioClip _sndGrab;
+    private AudioClip _sndClose;
 
 	void Awake ()
 	{
@@ -49,12 +49,12 @@ public class ScreenGame : MonoBehaviour {
 	void Start () {
 		Defs.audioSourceMusic = GetComponent<AudioSource> ();
 		_screenAnimation = screenAnimationObject.GetComponent<ScreenColorAnimation> ();
-		points = GetComponent<Points> ();
-		coins = GetComponent<Coins> ();
-		bestScore = GetComponent<BestScore> ();
+		_points = GetComponent<Points> ();
+		_coins = GetComponent<Coins> ();
+		_bestScore = GetComponent<BestScore> ();
 		_poinsBmScript = GetComponent<PointsBubbleManager> ();
 
-		state = 0;
+		_state = 0;
 
 		/*hintCounter = PlayerPrefs.GetInt ("hintCounter", 3);
 		if (hintCounter >= 3) {
@@ -65,7 +65,7 @@ public class ScreenGame : MonoBehaviour {
 			hint.SetActive (true);
 		} */
 
-		camera_start_pos = Camera.main.transform.position;
+		_cameraStartPos = Camera.main.transform.position;
 
 		_sndLose = Resources.Load<AudioClip>("snd/fail");
 		_sndShowScreen = Resources.Load<AudioClip>("snd/showScreen");
@@ -91,9 +91,9 @@ public class ScreenGame : MonoBehaviour {
 		PlayerPrefs.SetInt ("QUEST_BOMBS_Counter", DefsGame.QUEST_BOMBS_Counter);
 		DefsGame.gameServices.ReportProgressWithGlobalID (DefsGame.gameServices.ACHIEVEMENT_EXPLOSIVE, DefsGame.QUEST_BOMBS_Counter);
 
-		points.UpdateVisual ();
-		coins.UpdateVisual ();
-		bestScore.UpdateVisual ();
+		_points.UpdateVisual ();
+		_coins.UpdateVisual ();
+		_bestScore.UpdateVisual ();
 
 		_isNextLevel = false;
 
@@ -118,31 +118,31 @@ public class ScreenGame : MonoBehaviour {
 
 	void Ball_OnGoal (int pointsCount)
 	{
-		if (isGameOver)
+		if (IsGameOver)
 			return;
 		D.Log ("Ball_OnBallInBasket");
 		_isNextLevel = true;
 		//int _pointsCount = DefsGame.bubbleMaxSize - _bubble.GetStartSize () + 1;
 
-		points.AddPoint (pointsCount);
+		_points.AddPoint (pointsCount);
 		_poinsBmScript.AddPoints (pointsCount);
 	}
 
 	void Ball_OnMiss (float delay)
 	{
-		if (isGameOver)
+		if (IsGameOver)
 			return;
 
 		Defs.PlaySound (_sndLose);
 
-		missDelay = delay;
+		_missDelay = delay;
 		if (DefsGame.IS_ACHIEVEMENT_MISS_CLICK == 0) {
 			++DefsGame.QUEST_MISS_Counter;
 			PlayerPrefs.SetInt ("QUEST_MISS_Counter", DefsGame.QUEST_MISS_Counter);
 			DefsGame.gameServices.ReportProgressWithGlobalID (DefsGame.gameServices.ACHIEVEMENT_MISS_CLICK, DefsGame.QUEST_MISS_Counter);
 		}
 
-		state = 3;
+		_state = 3;
 	}
 
 	public void EndCurrentGame() {
@@ -191,26 +191,26 @@ public class ScreenGame : MonoBehaviour {
 			}
 		}*/
 
-		state = 6;
+		_state = 6;
 
 		//PublishingService.Instance.ShowSceneTransition();
 	}
 
 	void Ball_OnThrow ()
 	{
-		if (isGameOver)
+		if (IsGameOver)
 			return;
 
 		++DefsGame.QUEST_THROW_Counter;
 
 		if (DefsGame.gameplayCounter == 1) {
-			points.ShowAnimation ();
+			_points.ShowAnimation ();
 		}
-		if (state == 1) {
+		if (_state == 1) {
 			DefsGame.currentScreen = DefsGame.SCREEN_GAME;
-			points.ResetCounter ();
+			_points.ResetCounter ();
 			UIManager.ShowUiElement ("scrMenuWowSlider");
-			state = 2;
+			_state = 2;
 			FlurryEventsManager.SendStartEvent ("attempt_length");
 		}
 
@@ -222,10 +222,10 @@ public class ScreenGame : MonoBehaviour {
 		BtnEscapeUpdate ();
 		BackgroundUpdate ();
 
-	    switch (state)
+	    switch (_state)
 	    {
 	        case 0:
-	            state = 1;
+	            _state = 1;
 	            Init();
 	            return;
 	        case 1:
@@ -252,10 +252,10 @@ public class ScreenGame : MonoBehaviour {
 	            }
 	            break;
 	        case 3:
-	            time += Time.deltaTime;
-	            if (time >= missDelay)
+	            _time += Time.deltaTime;
+	            if (_time >= _missDelay)
 	            {
-	                time = 0f;
+	                _time = 0f;
 	                _screenAnimation.SetAlphaMax(0.93f);
 	                _screenAnimation.SetAnimation(false, 0.1f);
 	                _screenAnimation.Show();
@@ -263,20 +263,20 @@ public class ScreenGame : MonoBehaviour {
 	                _screenAnimation.SetColor(1.0f, 0.21f, 0.21f);
 	                _screenAnimation.SetAutoHide(true);
 
-	                state = 4;
+	                _state = 4;
 	            }
 	            break;
 	        case 4:
 	            if (!_screenAnimation.isActiveAndEnabled)
 	            {
-	                state = 5;
-	                Camera.main.transform.position = new Vector3(camera_start_pos.x, camera_start_pos.y, camera_start_pos.z);
+	                _state = 5;
+	                Camera.main.transform.position = new Vector3(_cameraStartPos.x, _cameraStartPos.y, _cameraStartPos.z);
 	                EndCurrentGame();
 	            }
 	            else
 	            {
-	                Camera.main.transform.position = new Vector3(camera_start_pos.x + Random.Range(-0.015f, 0.015f),
-	                    camera_start_pos.y + Random.Range(-0.015f, 0.015f), camera_start_pos.z);
+	                Camera.main.transform.position = new Vector3(_cameraStartPos.x + Random.Range(-0.015f, 0.015f),
+	                    _cameraStartPos.y + Random.Range(-0.015f, 0.015f), _cameraStartPos.z);
 	            }
 	            break;
 	        case 5:
@@ -294,22 +294,22 @@ public class ScreenGame : MonoBehaviour {
 
 	            DefsGame.RingManager.Miss();
 	            HintCheck();
-	            isGameOver = false;
+	            IsGameOver = false;
 	            NextBackground();
 	            GameEvents.Send(OnShowMenu);
 	            DefsGame.currentScreen = DefsGame.SCREEN_MENU;
 
 
 
-	            state = 7;
+	            _state = 7;
 	            break;
 	        case 7:
-	            time += Time.deltaTime;
-	            if (time >= 0.8f)
+	            _time += Time.deltaTime;
+	            if (_time >= 0.8f)
 	            {
-	                time = 0f;
+	                _time = 0f;
 	                Init();
-	                state = 1;
+	                _state = 1;
 	            }
 	            break;
 	    }
@@ -510,8 +510,8 @@ public class ScreenGame : MonoBehaviour {
 	}
 
 	void GameOver() {
-		isGameOver = true;
-		state = 3;
+		IsGameOver = true;
+		_state = 3;
 	}
 
 	public void HideExitPanel() {

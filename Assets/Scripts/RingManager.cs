@@ -9,17 +9,26 @@ public class RingManager : MonoBehaviour {
 	public GameObject ball;
     public GameObject CoinPrefab;
 
-    private GameObject coinObject;
+    private GameObject _coinObject;
     private GameObject _prevRing;
-	[HideInInspector] public GameObject _nextRing;
+	[HideInInspector] public GameObject NextRing;
 
-	private const float StartXPosition = -5.6f;
+	private const float StartXPosition = -5.1f;
 
     [HideInInspector] public bool WaitMoveToStartPosition;
 
-	// Use this for initialization
+    private AudioClip[] _audioClips = new AudioClip[10];
+    private int _applauseID;
+
+    // Use this for initialization
 	void Start () {
 		DefsGame.RingManager = this;
+
+	    for (int i = 0; i < 10; i++)
+	    {
+	        _audioClips[i] = Resources.Load<AudioClip>("snd/Applause/applause" + (i+1).ToString());
+	    }
+	    _applauseID = -1;
 		Init ();
 	}
 	
@@ -45,16 +54,27 @@ public class RingManager : MonoBehaviour {
         AddTenPoints();
     }
 
-    private void Ball_OnGoal (int pointsCount)
-	{
-	    RingHead ringHead = _nextRing.GetComponentInChildren<RingHead>();
-	    ringHead.MoveToSky();
-	}
+    private void Ball_OnGoal(int pointsCount)
+    {
+        Invoke("MoveToSky", 0.7f);
+        if (pointsCount > 3)
+        {
+            if (_applauseID < _audioClips.Length - 1) ++_applauseID;
+            else _applauseID = 0;
+            Defs.PlaySound(_audioClips[_applauseID]);
+        }
+    }
+
+    private void MoveToSky()
+    {
+        RingHead ringHead = NextRing.GetComponentInChildren<RingHead>();
+        ringHead.MoveToSky();
+    }
 
     private void Ball_OnBallInBasket()
 	{
 	    MoveCurrentBasket();
-		_prevRing = _nextRing;
+		_prevRing = NextRing;
 
 		CreateNewRing ();
 	}
@@ -73,7 +93,7 @@ public class RingManager : MonoBehaviour {
     {
         WaitMoveToStartPosition = false;
         _prevRing = null;
-        _nextRing = null;
+        NextRing = null;
         CreateFirstRing ();
         CreateNewRing ();
     }
@@ -98,7 +118,7 @@ public class RingManager : MonoBehaviour {
 
         Vector3 newPoint = ChooseNextPoint ();
 
-        t = _nextRing.transform.DOMove (newPoint, 0.5f);
+        t = NextRing.transform.DOMove (newPoint, 0.5f);
         t.SetEase (Ease.InCubic);
         WaitMoveToStartPosition = true;
         t.OnComplete (() => {
@@ -116,7 +136,7 @@ public class RingManager : MonoBehaviour {
         t.SetEase (Ease.InCubic);
         ringObject.Remove ();
 
-        t = _nextRing.transform.DOMove (new Vector3 (StartXPosition, _nextRing.transform.position.y, 1f), 0.5f);
+        t = NextRing.transform.DOMove (new Vector3 (StartXPosition, NextRing.transform.position.y, 1f), 0.5f);
         t.SetEase (Ease.InCubic);
         t.OnComplete (() => {
             RingHead ringHead = _prevRing.GetComponentInChildren<RingHead>();
@@ -147,20 +167,20 @@ public class RingManager : MonoBehaviour {
 
     private void CreateNewRing() {
 		Vector3 newPoint = ChooseNextPoint ();
-		_nextRing = GetInactveRing ();
-		_nextRing.transform.position = new Vector3(newPoint.x + 10f, newPoint.y, newPoint.z);
-		RingHead ringHead = _nextRing.GetComponentInChildren<RingHead> (true);
+		NextRing = GetInactveRing ();
+		NextRing.transform.position = new Vector3(newPoint.x + 10f, newPoint.y, newPoint.z);
+		RingHead ringHead = NextRing.GetComponentInChildren<RingHead> (true);
 		ringHead.Show ();
 		//RingObject ringObject = _nextRing.GetComponent<RingObject> ();
 		//ringObject.ShieldVisual.Hide();
 
-		Tweener t = _nextRing.transform.DOMove (newPoint, 0.5f);
+		Tweener t = NextRing.transform.DOMove (newPoint, 0.5f);
 		t.SetEase (Ease.InCubic);
 		t.OnComplete (() => {
 			RespownBall();
 		    if ((DefsGame.QUEST_THROW_Counter == 2) || ((DefsGame.QUEST_THROW_Counter > 5) && (DefsGame.QUEST_THROW_Counter + 2) % 5 == 0))
 		    {
-		        RingObject ro = _nextRing.GetComponent<RingObject>();
+		        RingObject ro = NextRing.GetComponent<RingObject>();
 		        DefsGame.CoinSensor.gameObject.transform.position = ro.PointsPlace.transform.position;
 		        DefsGame.CoinSensor.Init ();
 		        DefsGame.CoinSensor.Show (true);
@@ -171,7 +191,7 @@ public class RingManager : MonoBehaviour {
     private Vector3 ChooseNextPoint() {
         float posX = 0;
 
-        if ((DefsGame.ScreenGame.isGameOver)||(DefsGame.currentPointsCount < 5)) posX = Random.Range(0f, 1.5f); else
+        if ((DefsGame.ScreenGame.IsGameOver)||(DefsGame.currentPointsCount < 5)) posX = Random.Range(0f, 1.5f); else
         if (DefsGame.currentPointsCount < 10) posX = Random.Range(0.5f, 2.5f); else
         if (DefsGame.currentPointsCount < 20) posX = Random.Range(1.0f, 3.5f); else
         if (DefsGame.currentPointsCount < 30) posX = Random.Range(1.5f, 4.5f); else
@@ -180,7 +200,7 @@ public class RingManager : MonoBehaviour {
         else
             posX = Random.Range(3f, 7.4f);
 		 
-		return new Vector3(posX, Random.Range(-ScreenSettings.ScreenHeight*0.35f, 0.0f), 1f);
+		return new Vector3(posX, Random.Range(-ScreenSettings.ScreenHeight*0.30f, 0.0f), 1f);
 	}
 
     private GameObject GetInactveRing() {

@@ -31,14 +31,14 @@ public class PointsBubbleManager : MonoBehaviour {
 			    {
 			        case 1:
 			        {
-			            _text.color = new Color(151f / 255f, 88f / 255f, 154f / 255f);
+			            _text.color = new Color(170f / 255f, 75f / 255f, 196f / 255f);
 			            _go.transform.localScale = new Vector3(_go.transform.localScale.x * 0.5f, _go.transform.localScale.x * 0.5f,
 			                1);
 			        }
 			            break;
 			        case 3:
 			        {
-			            _text.color = new Color(236f / 255f, 49f / 255f, 69f / 255f);
+			            _text.color = new Color(77f / 255f, 97f / 255f, 217f / 255f);
 			            _go.transform.localScale = new Vector3(_go.transform.localScale.x * 0.75f,
 			                _go.transform.localScale.x * 0.75f,
 			                1);
@@ -46,14 +46,14 @@ public class PointsBubbleManager : MonoBehaviour {
 			            break;
 			        case 10:
 			        {
-			            _text.color = new Color(52f / 255f, 160f / 255f, 103f / 255f);
+			            _text.color = new Color(222f / 255f, 125f / 255f, 48f / 255f);
 			            _go.transform.localScale = new Vector3(_go.transform.localScale.x * 1.5f, _go.transform.localScale.x * 1.5f,
 			                1);
 			        }
 			            break;
 			        case 30:
 			        {
-			            _text.color = new Color(63f / 255f, 131f / 255f, 233f / 255f);
+			            _text.color = new Color(42f / 255f, 131f / 255f, 30f / 255f);
 			            _go.transform.localScale = new Vector3(_go.transform.localScale.x * 2f, _go.transform.localScale.x * 2f,
 			                1);
 			        }
@@ -69,7 +69,7 @@ public class PointsBubbleManager : MonoBehaviour {
 		count = _count;
 
 
-		RingObject ringObject = DefsGame.RingManager._nextRing.GetComponent<RingObject> ();
+		RingObject ringObject = DefsGame.RingManager.NextRing.GetComponent<RingObject> ();
 		pos = ringObject.PointsPlace.position;
 	}
 }

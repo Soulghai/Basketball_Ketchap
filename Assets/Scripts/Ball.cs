@@ -10,6 +10,7 @@ public class Ball : MonoBehaviour
     public static event Action<float> OnMiss;
     public static event Action OnCoinSensor;
 
+    public ParticleSystem ParticleTrail;
     private int _targetLinePointCount;
     public GameObject TargetLinePoint;
     private const int TargetHintPartCountMax = 15;
@@ -35,8 +36,6 @@ public class Ball : MonoBehaviour
 
     private bool _isDrawTargetLine = false;
 
-    private AudioSource _ballThrow;
-
     private float _oldVelocityY;
 
     private int _pointsCount;
@@ -47,11 +46,17 @@ public class Ball : MonoBehaviour
     private bool _isTryThrow;
     private Sprite _sprite;
     private SpriteRenderer _spriteRenderer;
+    private AudioClip _ballThrow;
+    private AudioClip _ballRespown;
+    private float _hintTime = 0f;
 
     // Use this for initialization
     void Start()
     {
         DefsGame.Ball = this;
+
+        _ballThrow = Resources.Load<AudioClip>("snd/start_ball");
+        _ballRespown = Resources.Load<AudioClip>("snd/ball_respawn");
 
         _body = GetComponent<Rigidbody2D>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
@@ -65,12 +70,12 @@ public class Ball : MonoBehaviour
             _targetLinePoints[i] = (GameObject) Instantiate(TargetLinePoint, transform.position, Quaternion.identity);
         }
 
-        _ballThrow = GetComponent<AudioSource>();
-
         _targetHintPartCount = TargetHintPartCountMax;
 
         _targetLosePosition = _mouseStartPosition;
         SetNewSkin(DefsGame.currentFaceID);
+
+        ParticleTrail.Stop();
     }
 
     public void SetNewSkin(int _id) {
@@ -92,7 +97,7 @@ public class Ball : MonoBehaviour
         _mouseTarget = _targetLosePosition;
 
         _startPosition = position;
-        transform.position = new Vector3(_startPosition.x + 0.2f, _startPosition.y + 0.5f, _startPosition.z);
+        transform.position = new Vector3(_startPosition.x + 0.2f, _startPosition.y + 0.7f, _startPosition.z);
 
         _lifeTime = 0f;
         _isShield = false;
@@ -111,6 +116,8 @@ public class Ball : MonoBehaviour
 
         _isTryThrow = false;
         _pointsCount = 1;
+        Defs.PlaySound(_ballRespown);
+        ParticleTrail.Stop();
     }
 
     public void Hide()
@@ -255,10 +262,7 @@ public class Ball : MonoBehaviour
         float velY = -force.y;
         float velX = dist.x / 30f;
 
-        if (_indicatorCurrentParth < _targetLinePointCount)
-            ++_indicatorCurrentParth;
-        else
-            _indicatorCurrentParth = 0;
+        IncTargetHint();
 
         GameObject _object;
         float _scale = 1f;
@@ -287,9 +291,9 @@ public class Ball : MonoBehaviour
                         _scale = 0.15f + ((float) id / (float) _targetLinePointCount) * 0.45f;
                     else
                         _scale = 0.5f - (float) (id - TargetHintPartCountMax) * (0.45f / TargetHintPartCountMax);
-
-                    //if (i == _indicatorCurrentParth) _scale *= 1.2f;
                 }
+
+                if (id == _indicatorCurrentParth) _scale *= 1.35f;
 
                 _object.transform.localScale = Vector3.Lerp(_object.transform.localScale,
                     new Vector3(_scale, _scale, 1f),
@@ -297,6 +301,19 @@ public class Ball : MonoBehaviour
 
                 _object.transform.position = new Vector3(_pX, _pY, 1f);
             }
+        }
+    }
+
+    private void IncTargetHint()
+    {
+        _hintTime += Time.deltaTime;
+        if (_hintTime >= 0.05f)
+        {
+            _hintTime = 0f;
+            if (_indicatorCurrentParth < _targetLinePointCount - 1)
+                ++_indicatorCurrentParth;
+            else
+                _indicatorCurrentParth = 0;
         }
     }
 
@@ -342,7 +359,8 @@ public class Ball : MonoBehaviour
         _body.AddTorque(1);
         _isThrow = true;
 
-        _ballThrow.Play();
+        Defs.PlaySound(_ballThrow);
+        ParticleTrail.Play();
     }
 
     Vector2 CalcForce(float distX, float distY)
@@ -358,13 +376,13 @@ public class Ball : MonoBehaviour
     {
         if (_isGoal)
             return;
-        if (other.CompareTag("LoseTrigger"))
+        /*if (other.CompareTag("LoseTrigger"))
         {
             _isLose = true;
             _lifeTime = 0;
             _lifeDelay = 0.1f;
         }
-        else if (other.CompareTag("GoalTrigger"))
+        else */if (other.CompareTag("GoalTrigger"))
         {
             _isGoalTrigger = true;
             if (_isLose)
