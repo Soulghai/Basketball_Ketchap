@@ -6,7 +6,7 @@ using UnityEngine;
 public class Rate : MonoBehaviour {
 
 	void Awake() {
-		Defs.rate = this;
+		Defs.Rate = this;
 	}
 
 	public void RateUs()

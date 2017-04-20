@@ -5,9 +5,9 @@ public class RingObject : MonoBehaviour
     public RingHead RingHead;
     public ShieldVisual ShieldVisual;
     public Transform PointsPlace;
-	float _time;
-	const float Delay = 1f;
-	bool _isRemove;
+	private float _time;
+	private const float Delay = 1.0f;
+	private bool _isRemove;
 
 	// Use this for initialization
 	void Start () {

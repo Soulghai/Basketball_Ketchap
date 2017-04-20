@@ -8,7 +8,6 @@ public struct DefsGame {
     public static ScreenGame ScreenGame;
 	public static ScreenCoins screenCoins;
 	public static ScreenSkins screenSkins;
-	public static CoinsIconScript coinsIcon;
 	public static RingManager RingManager;
 	public static Ball Ball;
 	public static float WOW_MEETERER				= 0;
@@ -52,6 +51,7 @@ public struct DefsGame {
 	public static int IS_ACHIEVEMENT_COLLECTION = 0;
 
 	public static int QUEST_GAMEPLAY_Counter 				= 0;
+	public static int QUEST_GOALS_Counter 			    	= 0;
 	public static int QUEST_THROW_Counter 					= 0;
 	public static int QUEST_CHARACTERS_Counter 				= 0;
 	public static int QUEST_BOMBS_Counter 					= 0;
@@ -68,6 +68,7 @@ public struct DefsGame {
 	static public int rateCounter 								= 0;
     public static Coins Coins { get; set; }
     public static CoinSensor CoinSensor { get; set; }
+    public static bool IsNeedToShowCoin = false;
 
     static public void LoadVariables() {
 		noAds = PlayerPrefs.GetInt ("noAds", 0);
@@ -106,6 +107,7 @@ public struct DefsGame {
 		IS_ACHIEVEMENT_COLLECTION = PlayerPrefs.GetInt ("IS_ACHIEVEMENT_COLLECTION", 0);
 
 		QUEST_GAMEPLAY_Counter = PlayerPrefs.GetInt ("QUEST_GAMEPLAY_Counter", 0);
+        QUEST_GOALS_Counter = PlayerPrefs.GetInt ("QUEST_GOALS_Counter", 0);
 		QUEST_THROW_Counter = PlayerPrefs.GetInt ("QUEST_THROW_Counter", 0);
 		QUEST_CHARACTERS_Counter = PlayerPrefs.GetInt ("QUEST_CHARACTERS_Counter", 0);
 		QUEST_BOMBS_Counter = PlayerPrefs.GetInt ("QUEST_BOMBS_Counter", 0);

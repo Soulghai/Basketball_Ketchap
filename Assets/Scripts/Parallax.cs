@@ -30,7 +30,6 @@ public class Parallax : MonoBehaviour {
 
     void Update()
     {
-		float width = Camera.main.pixelWidth;
 		Vector2 bottomLeft = Camera.main.ScreenToWorldPoint(new Vector2 (0, 0));
         SpriteRenderer sprite;
 

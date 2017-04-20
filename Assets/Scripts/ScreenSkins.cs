@@ -43,7 +43,6 @@ public class ScreenSkins : MonoBehaviour {
 		    DefsGame.Ball.SetNewSkin (_id);
 
 		} else if (DefsGame.coinsCount >= DefsGame.facePrice [_id-1]) {
-			//DefsGame.coinsIcon.UpdatePosition ();
 			GameEvents.Send(OnAddCoinsVisual, -DefsGame.facePrice [_id-1]);
 			DefsGame.faceAvailable [_id] = 1;
 			DefsGame.currentFaceID = _id;

@@ -4,7 +4,6 @@ using System;
 public class Ball : MonoBehaviour
 {
     public static event Action OnBallInBasket;
-    public static event Action OnBallInBasketImmediately;
     public static event Action<int> OnGoal;
     public static event Action OnThrow;
     public static event Action<float> OnMiss;
@@ -21,6 +20,7 @@ public class Ball : MonoBehaviour
     private Rigidbody2D _body;
 
     private Vector3 _startPosition;
+    private Vector3 _startScale;
     private readonly Vector3 _mouseStartPosition = new Vector3(-1.5f, 2.6f, 1f);
     private Vector3 _targetLosePosition;
 
@@ -48,22 +48,36 @@ public class Ball : MonoBehaviour
     private SpriteRenderer _spriteRenderer;
     private AudioClip _ballThrow;
     private AudioClip _ballRespown;
+    private AudioClip _ballVsGround;
+    private AudioClip _ballVsRing;
+    private AudioClip _ballVsCoin;
     private float _hintTime = 0f;
+    private bool _isRing;
+    private AudioClip _ballVsShield;
+    private AudioClip _ballVsWeb;
+    private bool _isWeb;
+    private int _hintCounter;
 
     // Use this for initialization
     void Start()
     {
         DefsGame.Ball = this;
 
-        _ballThrow = Resources.Load<AudioClip>("snd/start_ball");
-        _ballRespown = Resources.Load<AudioClip>("snd/ball_respawn");
+        _ballThrow = Resources.Load<AudioClip>("snd/Ball/start_ball");
+        _ballRespown = Resources.Load<AudioClip>("snd/Ball/ball_respawn");
+        _ballVsGround = Resources.Load<AudioClip>("snd/Ball/BallVsGround");
+        _ballVsShield = Resources.Load<AudioClip>("snd/Ball/BallVsShield");
+        _ballVsWeb = Resources.Load<AudioClip>("snd/Ball/BallVsWeb");
+        _ballVsRing = Resources.Load<AudioClip>("snd/Ball/BallVsRing");
+        _ballVsCoin = Resources.Load<AudioClip>("snd/bonus_green");
 
         _body = GetComponent<Rigidbody2D>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
-        loadSprites (DefsGame.currentFaceID);
+        LoadSprites (DefsGame.currentFaceID);
         _targetLinePointCount = _targetLinePoints.Length - TargetHintPartCountMax;
 
         _startPosition = transform.position;
+        _startScale = transform.localScale;
 
         for (int i = 0; i < _targetLinePoints.Length; i++)
         {
@@ -71,21 +85,23 @@ public class Ball : MonoBehaviour
         }
 
         _targetHintPartCount = TargetHintPartCountMax;
+        _hintCounter = 0;
 
         _targetLosePosition = _mouseStartPosition;
         SetNewSkin(DefsGame.currentFaceID);
 
         ParticleTrail.Stop();
+        _isThrow = false;
     }
 
-    public void SetNewSkin(int _id) {
-        loadSprites (DefsGame.currentFaceID);
+    public void SetNewSkin(int id) {
+        LoadSprites (DefsGame.currentFaceID);
         _spriteRenderer.sprite = _sprite;
     }
 
-    void loadSprites(int _id){
+    private void LoadSprites(int id){
         //if ((Sprite)_sprite) Resources.UnloadAsset(_sprite);
-        _sprite = Resources.Load<Sprite>("gfx/Balls/ball" +(_id+1).ToString());
+        _sprite = Resources.Load<Sprite>("gfx/Balls/ball" +(id+1).ToString());
     }
 
     public void Respown(Vector3 position)
@@ -94,13 +110,27 @@ public class Ball : MonoBehaviour
         else
             _mouseTarget = _mouseStartPosition;
 
+        if (_isLose)
+        {
+            if (DefsGame.currentPointsCount < 3)
+            {
+                ++_hintCounter;
+            }
+            if (_hintCounter >= 3) {
+                _targetHintPartCount = TargetHintPartCountMax;
+                _hintCounter = 0;
+            }
+        }
+
         _mouseTarget = _targetLosePosition;
 
         _startPosition = position;
-        transform.position = new Vector3(_startPosition.x + 0.2f, _startPosition.y + 0.7f, _startPosition.z);
+        transform.position = new Vector3(_startPosition.x - 0.3f, _startPosition.y + 0.48f, _startPosition.z);
 
         _lifeTime = 0f;
         _isShield = false;
+        _isRing = false;
+        _isWeb = false;
         _isLose = false;
         _isGoal = false;
         _isGoalTrigger = false;
@@ -108,6 +138,7 @@ public class Ball : MonoBehaviour
         _isHideBall = false;
         _isShowBall = true;
         transform.localScale = new Vector3(0f, 0f, transform.localScale.z);
+        transform.rotation = Quaternion.identity;
         _isThrow = false;
         _body.isKinematic = true;
         _body.velocity = new Vector2();
@@ -159,7 +190,7 @@ public class Ball : MonoBehaviour
 
             if (_isShowBall)
             {
-                if (transform.localScale.x < 1f)
+                if (transform.localScale.x < _startScale.x)
                 {
                     transform.localScale = new Vector3(transform.localScale.x + 0.1f, transform.localScale.y + 0.1f,
                         transform.localScale.z);
@@ -168,7 +199,7 @@ public class Ball : MonoBehaviour
                 {
                     _isDrawTargetLine = true;
                     _isShowBall = false;
-                    transform.localScale = new Vector3(1f, 1f, transform.localScale.z);
+                    transform.localScale = new Vector3(_startScale.x, _startScale.y, _startScale.z);
                 }
             }
         }
@@ -217,6 +248,16 @@ public class Ball : MonoBehaviour
                     _body.isKinematic = true;
                     _lifeTime = -10000f;
                     GameEvents.Send(OnMiss, 0.1f);
+                }
+            }
+            else
+            {
+                float width = Camera.main.pixelWidth;
+                Vector2 bottomLeft = Camera.main.ScreenToWorldPoint(new Vector2(0, 0));
+                Vector2 bottomRight = Camera.main.ScreenToWorldPoint(new Vector2(width, 0));
+                if ((transform.position.x < bottomLeft.x - 1f) || (transform.position.x > bottomRight.x + 1f))
+                {
+                    LoseTrigger(true);
                 }
             }
         }
@@ -276,10 +317,11 @@ public class Ball : MonoBehaviour
 
             if (i % 2 != 0) continue;
 
-            id = (int) (i / 2);
+            id = i / 2;
             if (id < _targetLinePointCount + _targetHintPartCount)
             {
                 _object = _targetLinePoints[id];
+                if (!_object.activeSelf) _object.SetActive(true);
                 if (id == _targetLinePointCount - 1)
                     _scale = 1.0f;
                 //else
@@ -288,9 +330,9 @@ public class Ball : MonoBehaviour
                 else
                 {
                     if (id < _targetLinePointCount)
-                        _scale = 0.15f + ((float) id / (float) _targetLinePointCount) * 0.45f;
+                        _scale = 0.15f + id / (float) _targetLinePointCount * 0.45f;
                     else
-                        _scale = 0.5f - (float) (id - TargetHintPartCountMax) * (0.45f / TargetHintPartCountMax);
+                        _scale = 0.5f - (id - TargetHintPartCountMax) * (0.45f / TargetHintPartCountMax);
                 }
 
                 if (id == _indicatorCurrentParth) _scale *= 1.35f;
@@ -325,7 +367,18 @@ public class Ball : MonoBehaviour
             for (int i = 0; i < _targetLinePointCount + TargetHintPartCountMax; i++)
             {
                 _object = _targetLinePoints[i];
-                _object.transform.localScale = Vector3.Lerp(_object.transform.localScale, new Vector3(0, 0, 1f), 0.05f);
+                //_object.transform.localScale = Vector3.Lerp(_object.transform.localScale, new Vector3(0, 0, 1f), 0.05f);
+                if (_object.transform.localScale.x > 0f)
+                {
+                    _object.transform.localScale = new Vector3(
+                        _object.transform.localScale.x - 0.1f,
+                        _object.transform.localScale.y - 0.1f,
+                        _object.transform.localScale.z);
+                }
+                else
+                {
+                    _object.SetActive(false);
+                }
             }
         }
         else
@@ -376,19 +429,13 @@ public class Ball : MonoBehaviour
     {
         if (_isGoal)
             return;
-        /*if (other.CompareTag("LoseTrigger"))
-        {
-            _isLose = true;
-            _lifeTime = 0;
-            _lifeDelay = 0.1f;
-        }
-        else */if (other.CompareTag("GoalTrigger"))
+
+        if (other.CompareTag("GoalTrigger"))
         {
             _isGoalTrigger = true;
             if (_isLose)
             {
-                _isLose = false;
-                _pointsCount = 30;
+                _lifeTime = -1000000f;
             }
         }
         else if (other.CompareTag("GoalTrigger2"))
@@ -396,48 +443,87 @@ public class Ball : MonoBehaviour
             if (_isGoalTrigger)
             {
                 _isGoal = true;
-                _lifeDelay = 1f;
+                _lifeDelay = 1.5f;
                 _lifeTime = 0;
-                if (_isShield)
+
+
+                if (_isLose)
                 {
-                    if (_pointsCount == 3)
-                        _pointsCount = 1;
-                    else if (_pointsCount == 30)
-                    {
-                        _pointsCount = 10;
-                    }
+                    if ((!_isRing) && (!_isShield)) _pointsCount = 30; else
+                    if ((_isRing) && (!_isShield)) _pointsCount = 20; else
+                    if ((!_isRing) && (_isShield)) _pointsCount = 20; else
+                    if ((_isRing) && (_isShield)) _pointsCount = 10;
+                    _isLose = false;
                 }
+                else
+                {
+                    if ((!_isRing) && (!_isShield)) _pointsCount = 3; else
+                    if ((_isRing) && (!_isShield)) _pointsCount = 2; else
+                    if ((!_isRing) && (_isShield)) _pointsCount = 2; else
+                    if ((_isRing) && (_isShield)) _pointsCount = 1;
+                }
+
+                ++DefsGame.QUEST_GOALS_Counter;
+                PlayerPrefs.SetInt ("QUEST_GOALS_Counter", DefsGame.QUEST_GOALS_Counter);
                 GameEvents.Send(OnGoal, _pointsCount);
             }
         }
         else if (other.CompareTag("CoinSensor"))
         {
+            Defs.PlaySound(_ballVsCoin);
             GameEvents.Send(OnCoinSensor);
             D.Log("CoinSensor");
         }
     }
 
-void OnCollisionEnter2D(Collision2D other) {
-		if (_isGoal)
-			return;
+    void OnCollisionEnter2D(Collision2D other) {
+//		if (_isGoal)
+//			return;
         if (other.gameObject.CompareTag("LoseTrigger"))
         {
-            if (_isLose)
-            {
-                _lifeDelay = 1f;
-            }
-            else
-            {
-                _isLose = true;
-                _lifeTime = 0;
-                _lifeDelay = 2f;
-            }
+            if (!_isGoal) LoseTrigger();
+
+            Defs.PlaySound(_ballVsGround, Mathf.Min(_body.velocity.sqrMagnitude, 180f)/180f);
+//            D.Log("Ball LoseTrigger Velocity", _body.velocity.sqrMagnitude);
         } else
         if (other.gameObject.CompareTag("ShieldTrigger")) {
             _isShield = true;
-
+            Defs.PlaySound(_ballVsGround, Mathf.Min(_body.velocity.sqrMagnitude, 150f)/150f);
+        } else
+        if (other.gameObject.CompareTag("RingTrigger")) {
+            _isRing = true;
+            Defs.PlaySound(_ballVsRing, Mathf.Min(_body.velocity.sqrMagnitude, 100f)/100f);
+//            D.Log("Ball RingTrigger Velocity", _body.velocity.sqrMagnitude);
+        } else
+        if (other.gameObject.CompareTag("WebTrigger")) {
+            if (!_isWeb)
+            Defs.PlaySound(_ballVsWeb, Mathf.Min(_body.velocity.sqrMagnitude, 50f)/50f);
+//           D.Log("Ball RingTrigger Velocity", _body.velocity.sqrMagnitude);
+            _isWeb = true;
         }
 	}
+
+    private void LoseTrigger(bool immediately = false)
+    {
+        if (immediately)
+        {
+            _isLose = true;
+            _lifeTime = 0;
+            _lifeDelay = 0;
+            return;
+        }
+
+        if (_isLose)
+        {
+            _lifeDelay = 1f;
+        }
+        else
+        {
+            _isLose = true;
+            _lifeTime = 0;
+            _lifeDelay = 2f;
+        }
+    }
 
     private void CutDistance(ref Vector2 dist) {
 		if (dist.y < 1f) {

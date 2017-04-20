@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using DoozyUI;
 using System;
@@ -267,17 +265,17 @@ public class ScreenMenu : MonoBehaviour {
 	}
 
 	public void RateUs() {
-		FlurryEventsManager.SendEvent ("rate_us_impression", "start_screen");
-		Defs.rate.RateUs ();
+//		FlurryEventsManager.SendEvent ("rate_us_impression", "start_screen");
+//		Defs.Rate.RateUs ();
 		Defs.PlaySound(sndBtnClick, 1f);
 	}
 
 	public void Share() {
-		FlurryEventsManager.SendEvent ("share");
+//		FlurryEventsManager.SendEvent ("share");
 		if (SystemInfo.deviceModel.Contains ("iPad")) {
-			//Defs.shareVoxel.ShareClick ();
+//			Defs.shareVoxel.ShareClick ();
 		} else {
-			Defs.share.ShareClick ();
+//			Defs.Share.ShareClick ();
 		}
 		Defs.PlaySound(sndBtnClick, 1f);
 	}

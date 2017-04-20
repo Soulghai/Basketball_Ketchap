@@ -5,10 +5,10 @@ public class Coins : MonoBehaviour {
 
 	public Text textField;
 	public Image img;
-	int _pointsCount = 0;
-	bool _isShowAnimation = true;
-	float _startScale;
-	AudioClip _sndCoin;
+    private int _pointsCount = 0;
+    private bool _isShowAnimation = true;
+    private float _startScale;
+    private AudioClip _sndCoin;
 
 	// Use this for initialization
 	void Start ()
@@ -16,7 +16,6 @@ public class Coins : MonoBehaviour {
 	    DefsGame.Coins = this;
 		_sndCoin = Resources.Load<AudioClip>("snd/bonus");
 		textField.text = DefsGame.coinsCount.ToString();
-		//DefsGame.coinsIcon.UpdatePosition ();
 		_pointsCount = DefsGame.coinsCount;
 		Color color = textField.color;
 		color.a = 0f;
@@ -62,15 +61,15 @@ public class Coins : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (_isShowAnimation) {
-			Color _color = textField.color;
+			Color color = textField.color;
 			if (textField.color.a < 1f) {
-				_color.a += 0.1f;
+				color.a += 0.1f;
 			} else {
 				_isShowAnimation = false;
-				_color.a = 1f;
+				color.a = 1f;
 			}
-			textField.color = _color;
-			img.color = new Color(img.color.r, img.color.g, img.color.b, _color.a);
+			textField.color = color;
+			img.color = new Color(img.color.r, img.color.g, img.color.b, color.a);
 		}
 
 		if (img.transform.localScale.x > _startScale) {
@@ -83,7 +82,6 @@ public class Coins : MonoBehaviour {
 		_pointsCount += count;
 		DefsGame.coinsCount += count;
 		PlayerPrefs.SetInt ("coinsCount", DefsGame.coinsCount);
-		//DefsGame.coinsIcon.UpdatePosition ();
 	}
 
 	void AddPointVisual(int value)

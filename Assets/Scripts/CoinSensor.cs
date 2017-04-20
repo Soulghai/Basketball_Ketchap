@@ -1,21 +1,23 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class CoinSensor : MonoBehaviour {
+    bool _isVisible;
     bool _isShowAnimation;
     bool _isHideAnimation;
 
-    private Collider2D collider;
+    private Collider2D _collider;
+    private RingObject _target;
 
-	// Use this for initialization
+    // Use this for initialization
 	void Start ()
 	{
 	    DefsGame.CoinSensor = this;
-	    collider = GetComponent<Collider2D>();
+	    _collider = GetComponent<Collider2D>();
 	}
 
-    public void Init()
+    public void Init(RingObject target)
     {
+        _target = target;
         transform.localScale = new Vector3 (0f, 0f, 0f);
     }
 	
@@ -37,13 +39,20 @@ public class CoinSensor : MonoBehaviour {
 	            //Destroy (gameObject);
 	            _isHideAnimation = false;
 	            transform.localScale = new Vector3 (0f, 0f, 0f);
+	            _isVisible = false;
 	        }
+	    }
+
+	    if (_isVisible)
+	    {
+	        transform.position = Vector3.Lerp(transform.position, _target.PointsPlace.position, 0.3f);
 	    }
 	}
 
-    public void Show(bool _isAnimation) {
-        _isShowAnimation = _isAnimation;
-        collider.enabled = true;
+    public void Show(bool isAnimation) {
+        _isShowAnimation = isAnimation;
+        _collider.enabled = true;
+        _isVisible = true;
 
         if (_isShowAnimation)
         {
@@ -53,7 +62,7 @@ public class CoinSensor : MonoBehaviour {
 
     public void Hide()
     {
-        collider.enabled = false;
+        _collider.enabled = false;
         _isHideAnimation = true;
     }
 }

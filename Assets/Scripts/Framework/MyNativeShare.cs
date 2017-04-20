@@ -12,7 +12,7 @@ public class MyNativeShare : MonoBehaviour {
 	public Texture2D image2;
 
 	void Awake() {
-		Defs.share = this;
+		Defs.Share = this;
 		//Save Image
 		byte[] bytes = image.EncodeToPNG();
 		string path = Application.persistentDataPath + "/promo1.jpg";

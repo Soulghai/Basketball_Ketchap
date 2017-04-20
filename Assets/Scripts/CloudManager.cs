@@ -5,23 +5,27 @@ using System.Collections.Generic;
 public class CloudManager : MonoBehaviour {
     public GameObject[] Clouds;
 
-    private const float PositionY = 3.05f;
+    private const float PositionY = 2.5f;
     private const float PositionXSpace = 1f;
-    private const float PositionYSpace = 1.3f;
     private readonly List<GameObject> _activeArr = new List<GameObject>();
+    private float _positionYSpace;
 
-	// Use this for initialization
+    // Use this for initialization
 	void Start ()
 	{
+	    float height = Camera.main.pixelHeight;
+	    Vector2 bottomLeft = Camera.main.ScreenToWorldPoint(new Vector2 (0, height));
+	    _positionYSpace = bottomLeft.y - 0.5f;
+
 	    GameObject go = AddObject();
 	    go.transform.position = new Vector3(-9.5f + Random.Range(-PositionXSpace, PositionXSpace),
-	        PositionY + Random.Range(-PositionYSpace, PositionYSpace), 1f);
+	        Random.Range(PositionY, _positionYSpace), 1f);
 	    go = AddObject();
 	    go.transform.position = new Vector3(0f + Random.Range(-PositionXSpace, PositionXSpace),
-	        PositionY + Random.Range(-PositionYSpace, PositionYSpace), 1f);
+	        Random.Range(PositionY, _positionYSpace), 1f);
 	    go = AddObject();
-	    go.transform.position = new Vector3(9.5f + Random.Range(-PositionXSpace, PositionXSpace),
-	        PositionY + Random.Range(-PositionYSpace, PositionYSpace), 1f);
+	    go.transform.position = new Vector3(6.5f + Random.Range(-PositionXSpace, PositionXSpace),
+	        Random.Range(PositionY, _positionYSpace), 1f);
 
 	    StartCoroutine (SpawnCloud ());
 	}
@@ -30,13 +34,12 @@ public class CloudManager : MonoBehaviour {
         while (true)
         {
             AddObject();
-            yield return new WaitForSeconds (16f + Random.value*3.0f);
+            yield return new WaitForSeconds (22f + Random.value*3.0f);
         }
     }
 
 	// Update is called once per frame
 	void Update () {
-	    float width = Camera.main.pixelWidth;
 	    Vector2 bottomLeft = Camera.main.ScreenToWorldPoint(new Vector2 (0, 0));
 	    SpriteRenderer sprite;
 	    GameObject go;
@@ -64,7 +67,7 @@ public class CloudManager : MonoBehaviour {
         float width = Camera.main.pixelWidth;
         Vector2 bottomRight = Camera.main.ScreenToWorldPoint(new Vector2 (width, 0));
         go.transform.position = new Vector3(bottomRight.x + sprite.bounds.size.x*0.5f  + Random.Range(0, PositionXSpace),
-            PositionY + Random.Range(-PositionYSpace, PositionYSpace), 1f);
+            Random.Range(PositionY, _positionYSpace), 1f);
         _activeArr.Add(go);
         return go;
     }

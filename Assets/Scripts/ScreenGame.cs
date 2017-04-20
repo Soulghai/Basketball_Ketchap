@@ -5,12 +5,13 @@ using DoozyUI;
 
 public class ScreenGame : MonoBehaviour {
 	public GameObject screenAnimationObject;
-	ScreenColorAnimation _screenAnimation;
+
+    private ScreenColorAnimation _screenAnimation;
 	public GameObject[] backgrounds;
-	int _currentBackgroundId = 0;
-	GameObject _backgroundPrev;
-	GameObject _backgroundNext;
-	bool _isBackgroundChange = false;
+    private int _currentBackgroundId = 0;
+    private GameObject _backgroundPrev;
+    private GameObject _backgroundNext;
+    private bool _isBackgroundChange = false;
     private Points _points;
     private Coins _coins;
     private BestScore _bestScore;
@@ -47,7 +48,7 @@ public class ScreenGame : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		Defs.audioSourceMusic = GetComponent<AudioSource> ();
+		Defs.AudioSourceMusic = GetComponent<AudioSource> ();
 		_screenAnimation = screenAnimationObject.GetComponent<ScreenColorAnimation> ();
 		_points = GetComponent<Points> ();
 		_coins = GetComponent<Coins> ();
