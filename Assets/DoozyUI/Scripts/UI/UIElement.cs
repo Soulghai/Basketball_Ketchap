@@ -391,6 +391,33 @@ namespace DoozyUI
             startScale = GetRectTransform.localScale;
             childCanvas = GetComponentsInChildren<Canvas>();
             childButtons = GetComponentsInChildren<UIButton>();
+
+            moveIn.soundAtStart = moveInSoundAtStart;
+            moveIn.soundAtFinish = moveInSoundAtFinish;
+            rotationIn.soundAtStart = rotationInSoundAtStart;
+            rotationIn.soundAtFinish = rotationInSoundAtFinish;
+            scaleIn.soundAtStart = scaleInSoundAtStart;
+            scaleIn.soundAtFinish = scaleInSoundAtFinish;
+            fadeIn.soundAtStart = fadeInSoundAtStart;
+            fadeIn.soundAtFinish = fadeInSoundAtFinish;
+
+            moveLoop.soundAtStart = moveLoopSoundAtStart;
+            moveLoop.soundAtFinish = moveLoopSoundAtFinish;
+            rotationLoop.soundAtStart = rotationLoopSoundAtStart;
+            rotationLoop.soundAtFinish = rotationLoopSoundAtFinish;
+            scaleLoop.soundAtStart = scaleLoopSoundAtStart;
+            scaleLoop.soundAtFinish = scaleLoopSoundAtFinish;
+            fadeLoop.soundAtStart = fadeLoopSoundAtStart;
+            fadeLoop.soundAtFinish = fadeLoopSoundAtFinish;
+
+            moveOut.soundAtStart = moveOutSoundAtStart;
+            moveOut.soundAtFinish = moveOutSoundAtFinish;
+            rotationOut.soundAtStart = rotationOutSoundAtStart;
+            rotationOut.soundAtFinish = rotationOutSoundAtFinish;
+            scaleOut.soundAtStart = scaleOutSoundAtStart;
+            scaleOut.soundAtFinish = scaleOutSoundAtFinish;
+            fadeOut.soundAtStart = fadeOutSoundAtStart;
+            fadeOut.soundAtFinish = fadeOutSoundAtFinish;
         }
 
         void Start()

@@ -1198,6 +1198,18 @@ namespace DoozyUI
             DOTween.Kill(id + "_DoRotationLoop");
             DOTween.Kill(id + "_DoScaleLoop");
             DOTween.Kill(id + "_DoFadeLoop");
+
+            // Unity has a bug where the layouts don't update correctly (2017-04-07 / Unity 5.5.0p4)
+            // This bug has been around for awhile and may be around for the future
+            // This forces an update of at least the parent, this should be enough since we are only animating our local positions
+            if (rectTransform.parent)
+            {
+                var layout = rectTransform.parent.GetComponent<UnityEngine.UI.LayoutGroup>();
+                if (layout && layout.enabled)
+                {
+                    layout.enabled = !layout.enabled; layout.enabled = !layout.enabled;
+                }
+            }
         }
         #endregion
 

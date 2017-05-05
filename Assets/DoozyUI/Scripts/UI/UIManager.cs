@@ -51,7 +51,7 @@ namespace DoozyUI
         public const string DISPATCH_ALL = "~Dispatch All~";
 
         public const string COPYRIGHT = "Copyright (c) 2015 - 2017 Doozy Entertainment / Marlink Trading SRL. All Rights Reserved.";
-        public const string VERSION = "Version 2.7p5";
+        public const string VERSION = "Version 2.7p6";
         #endregion
 
         #region Enums - EventType, Orientation

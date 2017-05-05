@@ -13,7 +13,7 @@ using UnityEditor;
 namespace DoozyUI
 {
     [AddComponentMenu("DoozyUI/Playmaker/Event Dispatcher", 10)]
-    [RequireComponent(typeof(PlayMakerFSM))]
+    //[RequireComponent(typeof(PlayMakerFSM))]
     public class PlaymakerEventDispatcher : MonoBehaviour
     {
 
