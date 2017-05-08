@@ -31,11 +31,6 @@ public class RingManager : MonoBehaviour {
 	    _applauseID = -1;
 		Init ();
 	}
-	
-	// Update is called once per frame
-	void Update () {
-
-	}
 
 	void OnEnable() {
 	    Ball.OnGoal += Ball_OnGoal;
@@ -73,10 +68,11 @@ public class RingManager : MonoBehaviour {
 
     private void Ball_OnBallInBasket()
 	{
-	    MoveCurrentBaskets();
+		Vector3 newPoint = ChooseNextPoint ();
+	    MoveCurrentBaskets(new Vector3(-newPoint.x*0.5f, newPoint.y, 1f));
 		_prevRing = NextRing;
 
-		CreateNewRing ();
+		CreateNewRing (new Vector3(newPoint.x*0.5f, newPoint.y, 1f));
 	}
 
     public void Miss()
@@ -94,31 +90,19 @@ public class RingManager : MonoBehaviour {
         WaitMoveToStartPosition = false;
         _prevRing = null;
         NextRing = null;
-        CreateFirstRing ();
-        CreateNewRing ();
-    }
-
-
-    private void AddTenPoints()
-    {
-        for (int i = 0; i < 10; i++)
-        {//Camera.main.ScreenToWorldPoint(
-            GameObject coin = (GameObject) Instantiate(CoinPrefab, DefsGame.CoinSensor.gameObject.transform.position,
-                Quaternion.identity);
-            Coin coinScript = coin.GetComponent<Coin>();
-            coinScript.MoveToEnd();
-        }
-        DefsGame.CoinSensor.Hide();
+	    Vector3 newPoint = ChooseNextPoint ();
+        CreateFirstRing (new Vector3(-newPoint.x*0.5f, -2f, 1f));
+        CreateNewRing (new Vector3(newPoint.x*0.5f, -1f, 1f));
     }
 
     private void MoveToStartPosition()
     {
-        Tweener t = _prevRing.transform.DOMove (new Vector3 (StartXPosition, -2f, 1f), 0.5f);
+	    Vector3 newPoint = ChooseNextPoint ();
+
+        Tweener t = _prevRing.transform.DOMove (new Vector3 (-newPoint.x*0.5f, -2f, 1f), 0.5f);
         t.SetEase (Ease.InCubic);
 
-        Vector3 newPoint = ChooseNextPoint ();
-
-        t = NextRing.transform.DOMove (newPoint, 0.5f);
+        t = NextRing.transform.DOMove (new Vector3 (newPoint.x*0.5f, -1f, 1f), 0.5f);
         t.SetEase (Ease.InCubic);
         WaitMoveToStartPosition = true;
         t.OnComplete (() => {
@@ -128,47 +112,31 @@ public class RingManager : MonoBehaviour {
         });
     }
 
-
-    private void MoveCurrentBaskets()
+    private void MoveCurrentBaskets(Vector3 newPoint)
     {
         RingObject ringObject = _prevRing.GetComponent<RingObject> ();
-        Tweener t = _prevRing.transform.DOMove (new Vector3 (StartXPosition - 5f, _prevRing.transform.position.y, 1f), 0.5f);
+        Tweener t = _prevRing.transform.DOMove (new Vector3 (-10f, _prevRing.transform.position.y, 1f), 0.5f);
         t.SetEase (Ease.InCubic);
         ringObject.Remove ();
 
-        t = NextRing.transform.DOMove (new Vector3 (StartXPosition, NextRing.transform.position.y, 1f), 0.5f);
+        t = NextRing.transform.DOMove (new Vector3 (newPoint.x, NextRing.transform.position.y, 1f), 0.5f);
         t.SetEase (Ease.InCubic);
-        t.OnComplete (() => {
-            //RingHead ringHead = _prevRing.GetComponentInChildren<RingHead>();
-            //ringHead.Hide();
-
-			//ringObject = _prevRing.GetComponent<RingObject> ();
-			//ringObject.ShieldVisual.Hide();
-        });
 
         GameEvents.Send(OnParallaxMove);
     }
 
-    private void RespownBall() {
-		Ball ballScript = ball.GetComponent<Ball> ();
-		ballScript.Respown (_prevRing.transform.position);
-	}
-
-    private void CreateFirstRing() {
+    private void CreateFirstRing(Vector3 newPoint) {
 		_prevRing = GetInactveRing ();
-		_prevRing.transform.position = new Vector3 (StartXPosition - 5f, -2f, 1f);
-		Tweener t = _prevRing.transform.DOMove (new Vector3 (StartXPosition, -2f, 1f), 0.5f);
+	    _prevRing.transform.position = new Vector3(newPoint.x - 10f, newPoint.y, newPoint.z);
+		Tweener t = _prevRing.transform.DOMove (newPoint, 0.5f);
 		t.SetEase (Ease.InCubic);
 		RingHead ringHead = _prevRing.GetComponentInChildren<RingHead> ();
 		ringHead.Hide();
-		//RingObject ringObject = _prevRing.GetComponent<RingObject> ();
-		//ringObject.ShieldVisual.Hide();
 	}
 
-    private void CreateNewRing() {
-		Vector3 newPoint = ChooseNextPoint ();
+    private void CreateNewRing(Vector3 newPoint) {
 		NextRing = GetInactveRing ();
-		NextRing.transform.position = new Vector3(newPoint.x + 10f, newPoint.y, newPoint.z);
+	    NextRing.transform.position = new Vector3(newPoint.x + 10f, newPoint.y, newPoint.z);
 		RingHead ringHead = NextRing.GetComponentInChildren<RingHead> (true);
 		ringHead.Show ();
 		//RingObject ringObject = _nextRing.GetComponent<RingObject> ();
@@ -195,16 +163,16 @@ public class RingManager : MonoBehaviour {
     private Vector3 ChooseNextPoint() {
         float posX;
 
-        if ((DefsGame.ScreenGame.IsGameOver)||(DefsGame.currentPointsCount < 5)) posX = Random.Range(0f, 1.5f); else
-        if (DefsGame.currentPointsCount < 10) posX = Random.Range(0.5f, 2.5f); else
-        if (DefsGame.currentPointsCount < 20) posX = Random.Range(1.0f, 3.5f); else
-        if (DefsGame.currentPointsCount < 30) posX = Random.Range(1.5f, 4.5f); else
-        if (DefsGame.currentPointsCount < 40) posX = Random.Range(2f, 5.5f); else
-        if (DefsGame.currentPointsCount < 50) posX = Random.Range(2.5f, 6.5f);
+        if ((DefsGame.ScreenGame.IsGameOver)||(DefsGame.currentPointsCount < 5)) posX = Random.Range(5f, 6.5f); else
+        if (DefsGame.currentPointsCount < 10) posX = Random.Range(5.5f, 7.5f); else
+        if (DefsGame.currentPointsCount < 20) posX = Random.Range(6.0f, 8.5f); else
+        if (DefsGame.currentPointsCount < 30) posX = Random.Range(6.5f, 9.5f); else
+        if (DefsGame.currentPointsCount < 40) posX = Random.Range(7f, 10.5f); else
+        if (DefsGame.currentPointsCount < 50) posX = Random.Range(7.5f, 11.5f);
         else
-            posX = Random.Range(3f, 7.4f);
+            posX = Random.Range(8f, 12.4f);
 		 
-		return new Vector3(posX, Random.Range(-3.65f, -0.5f), 1f);
+		return new Vector3(posX, Random.Range(-3.5f, -0.5f), 1f);
 	}
 
     private GameObject GetInactveRing() {
@@ -221,5 +189,22 @@ public class RingManager : MonoBehaviour {
 		ring.SetActive (true);
 
 		return ring;
+	}
+
+	private void RespownBall() {
+		Ball ballScript = ball.GetComponent<Ball> ();
+		ballScript.Respown (_prevRing.transform.position);
+	}
+
+	private void AddTenPoints()
+	{
+		for (int i = 0; i < 10; i++)
+		{//Camera.main.ScreenToWorldPoint(
+			GameObject coin = (GameObject) Instantiate(CoinPrefab, DefsGame.CoinSensor.gameObject.transform.position,
+				Quaternion.identity);
+			Coin coinScript = coin.GetComponent<Coin>();
+			coinScript.MoveToEnd();
+		}
+		DefsGame.CoinSensor.Hide();
 	}
 }
